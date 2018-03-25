@@ -1,0 +1,88 @@
+echo ###########Privilege Escalation checker BAT############## > report.txt
+hostname >> report.txt
+whoami
+whoami /priv
+systeminfo | findstr /B /C:"OS Name" /C:"OS Version" /C:"Domain"
+net users
+net localgroup
+net localgroup administrator
+ip config /all
+route print
+arp -a
+
+net session
+-----------Shares------------
+net share
+-----------Started Services------------
+net start
+netstat -ano
+netsh firewall show state
+netsh firewall show config 
+netsh advfirewall firewall
+tasklist /SVC
+schtasks /query /fo LIST /v
+reg query HKLM\SOFTWARE\Policies\Microsoft\Windows\Installer\AlwaysInstallElevated 
+reg query HKCU\SOFTWARE\Policies\Microsoft\Windows\Installer\AlwaysInstallElevated
+dir /s *pass* == *cred* == *vnc* == *.config* 
+findstr /si password *.xml *.ini *.txt
+reg query HKLM /f password /t REG_SZ /s
+reg query HKCU /f password /t REG_SZ /s
+sc qc Spooler
+accesschk.exe -ucqv Spooler 
+tasklist /FO CSV
+Using the dir command to find Alternate Data Streams
+C:\> dir /R | find ":$D"
+
+wmic startup list full
+List the machines, with usernames, that were connected via RDP
+C:\> reg query "HKCU\Software\Microsoft\Terminal Server Client\Servers" /s
+netsh winhttp import proxy source=ie
+
+List ALL services AND their binaries
+for /F "tokens=2* delims= " %i in ('sc query ^| find /I "ce_name"') do @sc qc %i %j
+
+Enable remote desktop using reg
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 0 /f
+accesschk.exe -ucqv Spooler >> report.txt
+
+
+
+echo # Vulnerable Services #
+
+echo  By default WinXP SP1 grant "Authenticated Users" SERVICE_ALL_ACCESS to "SSDPSRV" and "upnphost"!
+
+REG ADD "HKCU\Software\Sysinternals\AccessChk" /v EulaAccepted /t REG_DWORD /d 1 /f > NUL 2>&1
+REG ADD "HKCU\Software\Sysinternals\ListDLLs" /v EulaAccepted /t REG_DWORD /d 1 /f > NUL 2>&1
+REG ADD "HKCU\Software\Sysinternals\PipeList" /v EulaAccepted /t REG_DWORD /d 1 /f > NUL 2>&1
+
+accesschk.exe /accepteula -uwcqv "Authenticated Users" * 
+accesschk.exe /accepteula -uwcqv "Power Users" *
+accesschk.exe /accepteula -uwcqv "Users" *
+
+echo # Vulnerable Folder Permissions #
+
+accesschk.exe /accepteula -uwdqs "Users" c:\
+accesschk.exe /accepteula -uwdqs "Authenticated Users" c:\
+
+echo # Vulnerable File Permissions #
+
+accesschk.exe /accepteula -uwqs "Users" c:\*.*
+accesschk.exe /accepteula -uwqs "Authenticated Users" c:\*.*
+
+rem # Unquoted Service Paths #
+wmic service get name,displayname,pathname,startmode |findstr /i "auto" |findstr /i /v "c:\windows\\" |findstr /i /v """
+rem # Clear-text/base64 Passwords #
+type c:\sysprep.inf
+type c:\sysprep\sysprep.xml
+type %WINDIR%\Panther\Unattend\Unattended.xml
+type %WINDIR%\Panther\Unattended.xml
+
+echo #file upload #
+
+dir tftp.exe /s
+dir ftp.exe /s
+dir nc.exe /s 
+
+cscript /?
+powershell.exe /?
+
