@@ -55,6 +55,8 @@ REG ADD "HKCU\Software\Sysinternals\AccessChk" /v EulaAccepted /t REG_DWORD /d 1
 REG ADD "HKCU\Software\Sysinternals\ListDLLs" /v EulaAccepted /t REG_DWORD /d 1 /f > NUL 2>&1
 REG ADD "HKCU\Software\Sysinternals\PipeList" /v EulaAccepted /t REG_DWORD /d 1 /f > NUL 2>&1
 
+srvcheck3
+
 accesschk.exe /accepteula -uwcqv "Authenticated Users" * 
 accesschk.exe /accepteula -uwcqv "Power Users" *
 accesschk.exe /accepteula -uwcqv "Users" *
